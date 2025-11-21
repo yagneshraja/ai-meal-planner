@@ -7,7 +7,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/meals")
-@CrossOrigin(origins = "http://localhost:5173") // Allow React (Vite) to access this
+@CrossOrigin(origins = "*") // Allow React (Vite) to access this
 public class MealController {
 
     @Autowired
