@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // The address of your Backend Island
-const API_URL = "http://localhost:8081/api/meals";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8081/api/meals";
 
 class MealService {
     
