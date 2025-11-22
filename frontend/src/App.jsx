@@ -1,8 +1,12 @@
 import { useState, useEffect } from 'react'
 import MealService from './MealService'
-import { FaRobot, FaTrash, FaUtensils, FaSave } from 'react-icons/fa' // You'll need to install this!
+import Portfolio from './Portfolio' // Import the new page
+import { FaRobot, FaTrash, FaSave, FaInfoCircle } from 'react-icons/fa'
 
 function App() {
+  // State to toggle between 'app' and 'portfolio' view
+  const [view, setView] = useState('app'); 
+
   const [meals, setMeals] = useState([])
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ dayOfWeek: 'MONDAY', mealType: 'BREAKFAST', itemName: '' })
@@ -11,8 +15,8 @@ function App() {
   const MEALS = ['BREAKFAST', 'LUNCH', 'DINNER']
 
   useEffect(() => {
-    fetchMeals();
-  }, [])
+    if (view === 'app') fetchMeals();
+  }, [view])
 
   const fetchMeals = () => {
     MealService.getAllMeals()
@@ -46,26 +50,44 @@ function App() {
       })
   }
 
-  // Helper to get specific meal
   const getMeal = (day, type) => meals.find(m => m.dayOfWeek === day && m.mealType === type);
+
+  // If view is portfolio, show the Portfolio component instead
+  if (view === 'portfolio') {
+    return <Portfolio onBack={() => setView('app')} />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 p-8 font-sans">
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
-            AI Chef Planner 👨‍🍳
-          </h1>
-          <button 
-            onClick={handleGenerate}
-            disabled={loading}
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-full font-bold transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50"
-          >
-            {loading ? <span className="animate-spin">↻</span> : <FaRobot />}
-            {loading ? 'Chef is thinking...' : 'AI Surprise Me'}
-          </button>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+              AI Chef Planner 👨‍🍳
+            </h1>
+            <p className="text-slate-400 text-sm">Your Autonomous Sunday Agent</p>
+          </div>
+
+          <div className="flex gap-3">
+            {/* The "How I Built This" Button */}
+            <button 
+              onClick={() => setView('portfolio')}
+              className="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 px-4 py-3 rounded-full font-bold transition-all border border-slate-600"
+            >
+              <FaInfoCircle /> How I Built This
+            </button>
+
+            <button 
+              onClick={handleGenerate}
+              disabled={loading}
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-full font-bold transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50"
+            >
+              {loading ? <span className="animate-spin">↻</span> : <FaRobot />}
+              {loading ? 'Chef is thinking...' : 'AI Surprise Me'}
+            </button>
+          </div>
         </div>
 
         {/* Input Form */}
