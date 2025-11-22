@@ -1,31 +1,26 @@
 package com.mealplanner.backend;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class GeminiService {
 
-    @Value("${gemini.api.key}")
-    private String apiKey;
+    private final ChatClient chatClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${gemini.api.url}")
-    private String apiUrl;
-
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper(); // To parse JSON
+    // Spring AI automatically injects the pre-configured ChatClient here.
+    // It knows about the API Key and URL from application.properties.
+    public GeminiService(ChatClient.Builder chatClientBuilder) {
+        this.chatClient = chatClientBuilder.build();
+    }
 
     public List<Meal> generateWeeklyPlan() {
         try {
-            // 1. The Prompt: We force the AI to give us JSON that matches our Database exactly
             String prompt = """
                 Generate a weekly meal plan (Monday to Sunday) for Breakfast, Lunch, and Dinner.
                 Strictly return ONLY a JSON array of objects. Do not add markdown formatting like ```json.
@@ -35,36 +30,17 @@ public class GeminiService {
                 ]
                 """;
 
-            // 2. Construct the Google API Request Payload
-            Map<String, Object> requestBody = Map.of(
-                "contents", List.of(
-                    Map.of("parts", List.of(
-                        Map.of("text", prompt)
-                    ))
-                )
-            );
+            // The New Way: Using Spring AI Client
+            String response = chatClient.prompt()
+                .user(prompt)
+                .call()
+                .content();
 
-            // 3. Set Headers
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+            // Clean up potential markdown artifacts
+            String cleanJson = response.replace("```json", "").replace("```", "").trim();
 
-            // 4. Send Request
-            String finalUrl = apiUrl + "?key=" + apiKey;
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                finalUrl, HttpMethod.POST, entity, String.class
-            );
-
-            // 5. Parse the "Candidate" text from Google
-            JsonNode root = objectMapper.readTree(response.getBody());
-            String rawJsonText = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
-
-            // Clean up potential markdown artifacts if the AI ignores instructions
-            rawJsonText = rawJsonText.replace("```json", "").replace("```", "").trim();
-
-            // 6. Convert JSON text to List<Meal>
-            JsonNode mealsArray = objectMapper.readTree(rawJsonText);
+            // Convert JSON text to List<Meal>
+            JsonNode mealsArray = objectMapper.readTree(cleanJson);
             List<Meal> generatedMeals = new ArrayList<>();
             
             if (mealsArray.isArray()) {
