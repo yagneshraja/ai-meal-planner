@@ -5,7 +5,6 @@ import { FaArrowLeft, FaReact, FaJava, FaDatabase, FaRobot, FaCogs } from 'react
 const Portfolio = ({ onBack }) => {
   
   useEffect(() => {
-    // Initialize Mermaid for the diagrams
     mermaid.initialize({ 
       startOnLoad: true, 
       theme: 'dark',
@@ -50,7 +49,7 @@ const Portfolio = ({ onBack }) => {
                 { icon: <FaReact />, title: 'Frontend', desc: 'React + Vite', tag: 'Vercel', color: 'text-blue-400', bg: 'bg-blue-900/20' },
                 { icon: <FaJava />, title: 'Backend', desc: 'Spring Boot 3', tag: 'Render', color: 'text-orange-400', bg: 'bg-orange-900/20' },
                 { icon: <FaDatabase />, title: 'Database', desc: 'PostgreSQL', tag: 'Cloud', color: 'text-purple-400', bg: 'bg-purple-900/20' },
-                { icon: <FaRobot />, title: 'AI Model', desc: 'Gemini 2.0', tag: 'Google', color: 'text-emerald-400', bg: 'bg-emerald-900/20' },
+                { icon: <FaRobot />, title: 'AI Model', desc: 'Gemini 2.0', tag: 'Spring AI', color: 'text-emerald-400', bg: 'bg-emerald-900/20' },
                 { icon: <FaCogs />, title: 'Agent', desc: 'Scheduler', tag: 'Autonomous', color: 'text-yellow-400', bg: 'bg-yellow-900/20' },
             ].map((item, idx) => (
                 <div key={idx} className="bg-slate-800/50 border border-slate-700 p-6 rounded-xl hover:transform hover:-translate-y-1 transition-all duration-300 shadow-lg">
@@ -127,6 +126,71 @@ const Portfolio = ({ onBack }) => {
             ))}
         </div>
       </section>
+
+      {/* Troubleshooting Accordion */}
+      <section className="max-w-4xl mx-auto px-4 py-12">
+        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            🛠️ Engineering "Battle Scars" <span class="text-sm font-normal text-slate-500 ml-auto">Click to expand</span>
+        </h2>
+        <div className="space-y-4">
+            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
+                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
+                    <span>Error 500: JDBC URL Mismatch</span>
+                    <span className="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+                    <strong>Issue:</strong> Render provided `postgresql://` but Java requires `jdbc:postgresql://`.<br />
+                    <strong>Fix:</strong> Manually constructed the URL in Environment Variables: `jdbc:postgresql://HOSTNAME:PORT/DB_NAME`.
+                </div>
+            </details>
+
+            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
+                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
+                    <span>Error 404: "Relation meals does not exist"</span>
+                    <span className="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+                    <strong>Issue:</strong> The Cloud Database was empty; tables weren't created automatically.<br />
+                    <strong>Fix:</strong> Added Environment Variable `SPRING_JPA_HIBERNATE_DDL_AUTO = update` to trigger Hibernate's table generation.
+                </div>
+            </details>
+
+            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
+                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
+                    <span>Error 403: CORS Forbidden</span>
+                    <span className="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+                    <strong>Issue:</strong> Render Backend rejected requests from Vercel Frontend.<br />
+                    <strong>Fix:</strong> Updated `@CrossOrigin(origins = "*")` in the Java Controller to allow external connections.
+                </div>
+            </details>
+
+            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
+                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
+                    <span>Error 503: Gemini Model Overloaded</span>
+                    <span className="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+                    <strong>Issue:</strong> The `gemini-2.5-flash` model was too busy/unavailable.<br />
+                    <strong>Fix:</strong> Downgraded API call to the stable `gemini-2.0-flash-001` version.
+                </div>
+            </details>
+
+            {/* The Updated Final Boss */}
+            <details className="bg-slate-800 border border-emerald-500/30 rounded-lg group shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+                <summary className="flex justify-between items-center p-4 cursor-pointer font-bold text-emerald-400 group-hover:text-emerald-300 transition">
+                    <span>Final Boss: Malformed OpenAI Base URL</span>
+                    <span className="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div className="p-4 border-t border-slate-700 text-slate-300 text-sm leading-relaxed">
+                    <strong>Issue:</strong> Spring AI's OpenAI Compatibility layer returned <code>404 Not Found (v1main)</code> when trying to reach Gemini 2.0. <br />
+                    <strong>Diagnosis:</strong> A trailing slash in the Base URL (`.../openai/`) caused a double-slash issue (`//chat`), breaking the path on Google's server.<br />
+                    <strong>Fix:</strong> Removed the trailing slash in <code>application.properties</code> and explicitly set the model to <code>gemini-2.0-flash-001</code>. Success!
+                </div>
+            </details>
+        </div>
+    </section>
 
     </div>
   );
