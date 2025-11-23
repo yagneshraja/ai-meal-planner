@@ -205,35 +205,55 @@ Generates a plan using Tools.
 
 Emails the user via Gmail SMTP.
 
-🛑 Phase 8: The "Lost Chapters" (Engineering Reality)
+🎭 Phase 8: Multi-Agent Orchestration
+
+Goal: Implement a "Self-Correcting" architecture where multiple AI personas collaborate.
+
+8.1 The Critic Agent
+
+We built CriticService.java with a specific persona ("Strict Nutritionist") to review the Chef's plans for balance and variety.
+
+8.2 The Feedback Loop
+
+We updated GeminiService.java to implement a "Retry Loop":
+
+Chef: Drafts Plan.
+
+Critic: Reviews Plan.
+
+Loop: If rejected, Chef retries with feedback (up to 3 attempts).
+
+Result: The system now argues with itself to produce higher-quality results before saving to the database.
+
+🛑 Phase 9: The "Lost Chapters" (Engineering Reality)
 
 This section details the critical human and environment errors we faced that are often omitted from standard tutorials.
 
-8.1 The Identity Crisis (Git Keychain)
+9.1 The Identity Crisis (Git Keychain)
 
 The Incident: Git refused to push code, claiming Permission denied because the Mac Keychain remembered an old account (yagneshworkai-pixel).
 The Reality: No amount of git config fixed it.
 The Solution: We performed a surgical deletion of the keychain entry via terminal:
 security delete-internet-password -s github.com
 
-8.2 The Rebase Conflict
+9.2 The Rebase Conflict
 
 The Incident: We ran git commit --amend on a pushed commit, creating a history conflict (non-fast-forward).
 The Reality: git pull failed because the histories were divergent.
 The Solution: We used git push --force to overwrite the remote history with our local truth.
 
-8.3 The Vercel Root Directory
+9.3 The Vercel Root Directory
 
 The Incident: Vercel deployment showed a 404 error.
 The Cause: Vercel tried to build the root folder (which has no frontend code) instead of the frontend folder.
 The Lesson: Always configure the Root Directory in Vercel settings for Monorepos.
 
-8.4 The Frontend Amnesia
+9.4 The Frontend Amnesia
 
 The Incident: Before the database, data vanished on page reload.
 The Lesson: We learned the hard way that React State is temporary (RAM), necessitating the move to a persistent Database (Disk).
 
-8.5 The Runaway Agent
+9.5 The Runaway Agent
 
 The Incident: We initially set the Scheduler to run "Every Minute" for testing.
 The Danger: This risked spamming the email API and hitting Gemini rate limits.

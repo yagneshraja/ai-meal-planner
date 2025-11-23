@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import mermaid from 'mermaid';
-import { FaArrowLeft, FaReact, FaJava, FaDatabase, FaRobot, FaCogs, FaTools, FaDownload } from 'react-icons/fa';
+import { FaArrowLeft, FaReact, FaJava, FaDatabase, FaRobot, FaCogs, FaTools, FaDownload, FaUserSecret } from 'react-icons/fa';
 
 const Portfolio = ({ onBack }) => {
   
@@ -37,7 +37,7 @@ const Portfolio = ({ onBack }) => {
           Architecture & <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Engineering Journey</span>
         </h1>
         <p className="max-w-2xl mx-auto text-lg text-slate-400 mb-8">
-          A deep dive into how this distributed cloud system was architected, from the React frontend to the Autonomous Spring Boot Agents.
+          A deep dive into how this distributed cloud system was architected, from the React frontend to the Autonomous Multi-Agent System.
         </p>
 
         {/* Download Button */}
@@ -61,7 +61,7 @@ const Portfolio = ({ onBack }) => {
                 { icon: <FaJava />, title: 'Backend', desc: 'Spring Boot 3', tag: 'Render', color: 'text-orange-400', bg: 'bg-orange-900/20' },
                 { icon: <FaDatabase />, title: 'Database', desc: 'PostgreSQL', tag: 'Cloud', color: 'text-purple-400', bg: 'bg-purple-900/20' },
                 { icon: <FaRobot />, title: 'AI Model', desc: 'Gemini 2.0', tag: 'Spring AI', color: 'text-emerald-400', bg: 'bg-emerald-900/20' },
-                { icon: <FaTools />, title: 'Agent Tools', desc: 'Function Calling', tag: 'Agentic', color: 'text-yellow-400', bg: 'bg-yellow-900/20' },
+                { icon: <FaUserSecret />, title: 'Multi-Agent', desc: 'Critic Loop', tag: 'Orchestration', color: 'text-pink-400', bg: 'bg-pink-900/20' },
             ].map((item, idx) => (
                 <div key={idx} className="bg-slate-800/50 border border-slate-700 p-6 rounded-xl hover:transform hover:-translate-y-1 transition-all duration-300 shadow-lg">
                     <div className={`text-4xl mb-4 ${item.color}`}>{item.icon}</div>
@@ -86,7 +86,8 @@ const Portfolio = ({ onBack }) => {
 
     subgraph Cloud Backend
         SpringBoot[Spring Boot API<br/>(Render)]
-        Agent[Autonomous Agent<br/>(Scheduler)]
+        Chef[Chef Agent]
+        Critic[Critic Agent]
     end
 
     subgraph Data & External
@@ -98,18 +99,26 @@ const Portfolio = ({ onBack }) => {
     User -->|Click UI| React
     React -->|Axios Request| SpringBoot
     SpringBoot <-->|RAG Context| DB
-    SpringBoot -->|Prompt| AI
-    AI -.->|Function Call| Tools
-    Tools -.->|Return Data| AI
-    AI -->|Final JSON| SpringBoot
     
-    Agent -.->|Every Sunday| SpringBoot
+    SpringBoot -->|Request Plan| Chef
+    Chef -->|Prompt| AI
+    AI -.->|Function Call| Tools
+    Tools -.->|Return Price| AI
+    AI -->|Draft Plan| Chef
+    
+    Chef -->|Review| Critic
+    Critic -->|Analyze| AI
+    AI -->|Critique| Critic
+    
+    Critic -- "Rejected (Refine)" --> Chef
+    Critic -- "Approved" --> SpringBoot
+    
+    SpringBoot -->|Final JSON| React
 
     style React fill:#1e293b,stroke:#3b82f6,stroke-width:2px
     style SpringBoot fill:#1e293b,stroke:#f97316,stroke-width:2px
-    style DB fill:#1e293b,stroke:#a855f7,stroke-width:2px
-    style AI fill:#1e293b,stroke:#10b981,stroke-width:2px
-    style Tools fill:#334155,stroke:#eab308,stroke-dasharray: 5 5`}
+    style Chef fill:#334155,stroke:#10b981,stroke-width:2px
+    style Critic fill:#334155,stroke:#ec4899,stroke-width:2px`}
           </div>
         </div>
       </section>
@@ -126,6 +135,7 @@ const Portfolio = ({ onBack }) => {
                 { step: 5, title: "Cloud Deployment", desc: "Dockerized the backend for Render and deployed the frontend to Vercel. Solved CORS, JDBC, and Environment Parity." },
                 { step: 6, title: "RAG Memory", desc: "Upgraded database to PostgreSQL + PGVector. Implemented local embedding models to give the AI 'Long Term Memory'." },
                 { step: 7, title: "Agentic Tools", desc: "Equipped the AI with 'Function Calling' capabilities. The Agent now autonomously checks grocery prices via Java code before suggesting meals." },
+                { step: 8, title: "Multi-Agent System", desc: "Orchestrated a 'Debate Team' where a Critic Agent reviews the Chef's plan for nutritional balance, forcing iterative improvements before saving." },
             ].map((item) => (
                 <div key={item.step} className="relative md:flex items-center justify-between md:odd:flex-row-reverse group">
                     <div className="absolute -left-[41px] md:static flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-800 text-emerald-400 font-bold z-10 group-hover:bg-emerald-500 group-hover:text-white transition-colors shadow-lg">
@@ -146,19 +156,7 @@ const Portfolio = ({ onBack }) => {
             🛠️ Engineering "Battle Scars" <span class="text-sm font-normal text-slate-500 ml-auto">Click to expand</span>
         </h2>
         <div className="space-y-4">
-            {/* Previous errors kept for history */}
             <details className="bg-slate-800 border border-slate-700 rounded-lg group">
-                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
-                    <span>Error 500: JDBC URL Mismatch</span>
-                    <span class="transition group-open:rotate-180">▼</span>
-                </summary>
-                <div class="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
-                    <strong>Issue:</strong> Render provided `postgresql://` but Java requires `jdbc:postgresql://`.<br />
-                    <strong>Fix:</strong> Manually constructed the URL in Environment Variables.
-                </div>
-            </details>
-            
-             <details className="bg-slate-800 border border-slate-700 rounded-lg group">
                 <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
                     <span>Error: "No such file or directory" (Postgres Ghost)</span>
                     <span class="transition group-open:rotate-180">▼</span>
@@ -166,6 +164,17 @@ const Portfolio = ({ onBack }) => {
                 <div class="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
                     <strong>Issue:</strong> A hidden PostgreSQL 14 process was blocking the new PostgreSQL 17 install, preventing `pgvector` from loading.<br />
                     <strong>Fix:</strong> Performed a "Nuclear Uninstall" of old versions, manually killed processes, and relinked the new Homebrew version.
+                </div>
+            </details>
+
+            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
+                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
+                    <span>Error: "Usage is Null" (Embedding Crash)</span>
+                    <span class="transition group-open:rotate-180">▼</span>
+                </summary>
+                <div class="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+                    <strong>Issue:</strong> Google's API returned null usage stats, crashing the OpenAI Embedding Client.<br />
+                    <strong>Fix:</strong> Switched to Local Transformers (ONNX) to generate embeddings on-device CPU.
                 </div>
             </details>
 

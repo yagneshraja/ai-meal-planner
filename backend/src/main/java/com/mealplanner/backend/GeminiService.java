@@ -17,76 +17,95 @@ public class GeminiService {
     @Autowired
     private MemoryService memoryService;
 
+    @Autowired
+    private CriticService criticService; 
+
     public GeminiService(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder.build();
     }
 
     public List<Meal> generateWeeklyPlan() {
-        try {
-            // 1. RAG Memory
-            String pastMemories = memoryService.retrieveContext("recent meals");
-            String memoryContext = pastMemories.isEmpty() ? "" : "Avoid these recent meals: " + pastMemories;
+        String pastMemories = memoryService.retrieveContext("recent meals");
+        String memoryContext = pastMemories.isEmpty() ? "" : "Avoid these recent meals: " + pastMemories;
+        
+        List<Meal> bestPlan = new ArrayList<>();
+        int attempts = 0;
+        boolean approved = false;
 
-            // 2. Chain-of-Thought Prompt
-            // We removed the "Strictly JSON" from the top and moved it to the end.
-            // We explicitly tell it to "Thinking Process" which encourages Tool Use.
-            String prompt = """
-                You are an AI Chef Agent. Your goal is to plan a weekly meal menu (Mon-Sun, Breakfast/Lunch/Dinner).
-                
-                CONTEXT:
-                %s
-                
-                INSTRUCTIONS:
-                1. Select a potential Dinner meal.
-                2. Call the 'groceryPrice' tool for the main ingredient of that meal.
-                3. If the price is > $10, pick a different meal and check THAT price.
-                4. Repeat until you have 7 cheap dinners.
-                
-                FINAL OUTPUT FORMAT:
-                After you have done the price checking, output the final plan as a JSON ARRAY.
-                Do not include your thinking or the prices in the final JSON, just the meal names.
-                Example: [{"dayOfWeek": "MONDAY", "mealType": "DINNER", "itemName": "Chicken Salad"}]
-                """.formatted(memoryContext);
+        // The Feedback Loop
+        while (!approved && attempts < 3) {
+            attempts++;
+            System.out.println("👨‍🍳 Chef is drafting plan... Attempt " + attempts);
 
-            // 3. Call AI with Tool
-            String response = chatClient.prompt()
-                .user(prompt)
-                .functions("groceryPrice") // Force tool availability
-                .call()
-                .content();
+            // If we have a previous plan that failed, we mention it (simplified for now)
+            String criticFeedback = (attempts > 1) ? "PREVIOUS PLAN WAS REJECTED. TRY AGAIN." : "";
 
-            // Clean potential markdown (The AI might add ```json blocks)
-            String cleanJson = response;
-            if (cleanJson.contains("```json")) {
-                cleanJson = cleanJson.substring(cleanJson.indexOf("```json") + 7);
-                if (cleanJson.contains("```")) {
-                    cleanJson = cleanJson.substring(0, cleanJson.indexOf("```"));
+            try {
+                String prompt = """
+                    You are an AI Chef Agent. Plan a weekly menu - south indian foods - healthy - fitness oriented (Mon-Sun, Breakfast/Lunch/Dinner).
+                    - research on what they eat most for breakfast, lunch and dinner in south india
+                    - ensure variety in protein sources
+                    - keep ingredients affordable (under $10 per meal)
+                    - consider seasonal vegetables
+                    - respond in JSON array format
+                    %s
+                    %s
+                    
+                    CRITICAL: Use 'groceryPrice' tool. If price > $10, swap ingredient.
+                    Strictly return ONLY a JSON array. No markdown.
+                    
+                    REQUIRED JSON KEYS for every object: "dayOfWeek", "mealType", "itemName".
+                    Example: [{"dayOfWeek": "MONDAY", "mealType": "DINNER", "itemName": "Chicken Salad"}]
+                    """.formatted(memoryContext, criticFeedback);
+
+                String response = chatClient.prompt()
+                    .user(prompt)
+                    .functions("groceryPrice")
+                    .call()
+                    .content();
+
+                String cleanJson = response.replace("```json", "").replace("```", "").trim();
+                JsonNode mealsArray = objectMapper.readTree(cleanJson);
+                
+                List<Meal> candidatePlan = new ArrayList<>();
+                if (mealsArray.isArray()) {
+                    for (JsonNode node : mealsArray) {
+                        Meal meal = new Meal();
+                        // FIX: Use .path() instead of .get() to prevent NullPointerException
+                        meal.setDayOfWeek(node.path("dayOfWeek").asText("MONDAY").toUpperCase());
+                        meal.setMealType(node.path("mealType").asText("DINNER").toUpperCase());
+                        meal.setItemName(node.path("itemName").asText("Surprise Meal"));
+                        candidatePlan.add(meal);
+                    }
                 }
-            }
-            cleanJson = cleanJson.trim();
 
-            // Parse
-            JsonNode mealsArray = objectMapper.readTree(cleanJson);
-            List<Meal> generatedMeals = new ArrayList<>();
-            
-            if (mealsArray.isArray()) {
-                for (JsonNode node : mealsArray) {
-                    Meal meal = new Meal();
-                    meal.setDayOfWeek(node.get("dayOfWeek").asText().toUpperCase());
-                    meal.setMealType(node.get("mealType").asText().toUpperCase());
-                    meal.setItemName(node.get("itemName").asText());
-                    generatedMeals.add(meal);
+                // 🕵️‍♂️ Send to the Critic
+                System.out.println("🕵️‍♂️ Sending plan to Critic...");
+                CriticService.Critique critique = criticService.reviewPlan(candidatePlan);
+                
+                if (critique.approved()) {
+                    System.out.println("✅ Critic Approved: " + critique.feedback());
+                    bestPlan = candidatePlan;
+                    approved = true;
+                } else {
+                    System.out.println("❌ Critic Rejected: " + critique.feedback());
                 }
+                
+                if (attempts == 3 && !approved) {
+                     System.out.println("⚠️ Max attempts reached. Using last plan.");
+                     bestPlan = candidatePlan;
+                }
+
+            } catch (Exception e) {
+                System.err.println("Attempt " + attempts + " failed: " + e.getMessage());
+                e.printStackTrace();
             }
-
-            // 4. Save Memory
-            memoryService.saveMealPlanMemory(generatedMeals);
-
-            return generatedMeals;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("AI Generation Failed: " + e.getMessage());
         }
+
+        if (!bestPlan.isEmpty()) {
+            memoryService.saveMealPlanMemory(bestPlan);
+        }
+        
+        return bestPlan;
     }
 }
