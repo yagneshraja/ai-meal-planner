@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import mermaid from 'mermaid';
-import { FaArrowLeft, FaReact, FaJava, FaDatabase, FaRobot, FaCogs, FaTools } from 'react-icons/fa';
+import { FaArrowLeft, FaReact, FaJava, FaDatabase, FaRobot, FaCogs, FaTools, FaDownload } from 'react-icons/fa';
 
 const Portfolio = ({ onBack }) => {
   
@@ -36,9 +36,20 @@ const Portfolio = ({ onBack }) => {
         <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-white">
           Architecture & <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">Engineering Journey</span>
         </h1>
-        <p className="max-w-2xl mx-auto text-lg text-slate-400">
+        <p className="max-w-2xl mx-auto text-lg text-slate-400 mb-8">
           A deep dive into how this distributed cloud system was architected, from the React frontend to the Autonomous Spring Boot Agents.
         </p>
+
+        {/* Download Button */}
+        <div className="flex justify-center">
+            <a 
+                href="/chronicles.md" 
+                download="AI_Meal_Planner_Masterclass.md"
+                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold transition-all shadow-lg shadow-emerald-500/20"
+            >
+                <FaDownload /> Download Full Chronicles
+            </a>
+        </div>
       </div>
 
       {/* Tech Stack */}
