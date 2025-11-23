@@ -5,7 +5,9 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the App
-FROM eclipse-temurin:17-jdk-alpine
+# CRITICAL CHANGE: We switch from 'alpine' to 'jammy' (Ubuntu) 
+# because the AI Transformer model needs standard C libraries (glibc) that Alpine lacks.
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
