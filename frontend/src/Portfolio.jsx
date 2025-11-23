@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import mermaid from 'mermaid';
-import { FaArrowLeft, FaReact, FaJava, FaDatabase, FaRobot, FaCogs } from 'react-icons/fa';
+import { FaArrowLeft, FaReact, FaJava, FaDatabase, FaRobot, FaCogs, FaTools } from 'react-icons/fa';
 
 const Portfolio = ({ onBack }) => {
   
@@ -50,7 +50,7 @@ const Portfolio = ({ onBack }) => {
                 { icon: <FaJava />, title: 'Backend', desc: 'Spring Boot 3', tag: 'Render', color: 'text-orange-400', bg: 'bg-orange-900/20' },
                 { icon: <FaDatabase />, title: 'Database', desc: 'PostgreSQL', tag: 'Cloud', color: 'text-purple-400', bg: 'bg-purple-900/20' },
                 { icon: <FaRobot />, title: 'AI Model', desc: 'Gemini 2.0', tag: 'Spring AI', color: 'text-emerald-400', bg: 'bg-emerald-900/20' },
-                { icon: <FaCogs />, title: 'Agent', desc: 'Scheduler', tag: 'Autonomous', color: 'text-yellow-400', bg: 'bg-yellow-900/20' },
+                { icon: <FaTools />, title: 'Agent Tools', desc: 'Function Calling', tag: 'Agentic', color: 'text-yellow-400', bg: 'bg-yellow-900/20' },
             ].map((item, idx) => (
                 <div key={idx} className="bg-slate-800/50 border border-slate-700 p-6 rounded-xl hover:transform hover:-translate-y-1 transition-all duration-300 shadow-lg">
                     <div className={`text-4xl mb-4 ${item.color}`}>{item.icon}</div>
@@ -79,25 +79,26 @@ const Portfolio = ({ onBack }) => {
     end
 
     subgraph Data & External
-        DB[(PostgreSQL)]
+        DB[(PostgreSQL + Vector)]
         AI[Gemini AI]
-        Email[Gmail SMTP]
+        Tools[Java Tools<br/>(Grocery Price Check)]
     end
 
     User -->|Click UI| React
     React -->|Axios Request| SpringBoot
-    SpringBoot -->|JPA| DB
-    SpringBoot -->|REST API| AI
+    SpringBoot <-->|RAG Context| DB
+    SpringBoot -->|Prompt| AI
+    AI -.->|Function Call| Tools
+    Tools -.->|Return Data| AI
+    AI -->|Final JSON| SpringBoot
     
     Agent -.->|Every Sunday| SpringBoot
-    Agent -->|Send List| Email
-    Email -.->|Deliver| User
 
     style React fill:#1e293b,stroke:#3b82f6,stroke-width:2px
     style SpringBoot fill:#1e293b,stroke:#f97316,stroke-width:2px
     style DB fill:#1e293b,stroke:#a855f7,stroke-width:2px
     style AI fill:#1e293b,stroke:#10b981,stroke-width:2px
-    style Agent fill:#334155,stroke:#eab308,stroke-dasharray: 5 5`}
+    style Tools fill:#334155,stroke:#eab308,stroke-dasharray: 5 5`}
           </div>
         </div>
       </section>
@@ -111,8 +112,9 @@ const Portfolio = ({ onBack }) => {
                 { step: 2, title: "Local Environment", desc: "Configured the 'Builder's Toolkit': Java 17, Node.js, MySQL, and Maven on macOS Silicon." },
                 { step: 3, title: "Full Stack Core", desc: "Built the Spring Boot REST API and connected it to React via Axios using the Service Pattern." },
                 { step: 4, title: "AI Integration", desc: "Implemented the 'Proxy Pattern' to securely route requests to Gemini 2.0 Flash." },
-                { step: 5, title: "Cloud Deployment", desc: "Dockerized the backend for Render and deployed the frontend to Vercel (Solved CORS & JDBC errors)." },
-                { step: 6, title: "Autonomous Agents", desc: "Created a 'Sunday Agent' that wakes up, plans meals, and emails the user automatically." },
+                { step: 5, title: "Cloud Deployment", desc: "Dockerized the backend for Render and deployed the frontend to Vercel. Solved CORS, JDBC, and Environment Parity." },
+                { step: 6, title: "RAG Memory", desc: "Upgraded database to PostgreSQL + PGVector. Implemented local embedding models to give the AI 'Long Term Memory'." },
+                { step: 7, title: "Agentic Tools", desc: "Equipped the AI with 'Function Calling' capabilities. The Agent now autonomously checks grocery prices via Java code before suggesting meals." },
             ].map((item) => (
                 <div key={item.step} className="relative md:flex items-center justify-between md:odd:flex-row-reverse group">
                     <div className="absolute -left-[41px] md:static flex items-center justify-center w-10 h-10 rounded-full border border-slate-700 bg-slate-800 text-emerald-400 font-bold z-10 group-hover:bg-emerald-500 group-hover:text-white transition-colors shadow-lg">
@@ -133,57 +135,35 @@ const Portfolio = ({ onBack }) => {
             🛠️ Engineering "Battle Scars" <span class="text-sm font-normal text-slate-500 ml-auto">Click to expand</span>
         </h2>
         <div className="space-y-4">
+            {/* Previous errors kept for history */}
             <details className="bg-slate-800 border border-slate-700 rounded-lg group">
                 <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
                     <span>Error 500: JDBC URL Mismatch</span>
-                    <span className="transition group-open:rotate-180">▼</span>
+                    <span class="transition group-open:rotate-180">▼</span>
                 </summary>
-                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+                <div class="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
                     <strong>Issue:</strong> Render provided `postgresql://` but Java requires `jdbc:postgresql://`.<br />
-                    <strong>Fix:</strong> Manually constructed the URL in Environment Variables: `jdbc:postgresql://HOSTNAME:PORT/DB_NAME`.
+                    <strong>Fix:</strong> Manually constructed the URL in Environment Variables.
                 </div>
             </details>
-
-            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
+            
+             <details className="bg-slate-800 border border-slate-700 rounded-lg group">
                 <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
-                    <span>Error 404: "Relation meals does not exist"</span>
-                    <span className="transition group-open:rotate-180">▼</span>
+                    <span>Error: "No such file or directory" (Postgres Ghost)</span>
+                    <span class="transition group-open:rotate-180">▼</span>
                 </summary>
-                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
-                    <strong>Issue:</strong> The Cloud Database was empty; tables weren't created automatically.<br />
-                    <strong>Fix:</strong> Added Environment Variable `SPRING_JPA_HIBERNATE_DDL_AUTO = update` to trigger Hibernate's table generation.
+                <div class="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
+                    <strong>Issue:</strong> A hidden PostgreSQL 14 process was blocking the new PostgreSQL 17 install, preventing `pgvector` from loading.<br />
+                    <strong>Fix:</strong> Performed a "Nuclear Uninstall" of old versions, manually killed processes, and relinked the new Homebrew version.
                 </div>
             </details>
 
-            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
-                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
-                    <span>Error 403: CORS Forbidden</span>
-                    <span className="transition group-open:rotate-180">▼</span>
-                </summary>
-                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
-                    <strong>Issue:</strong> Render Backend rejected requests from Vercel Frontend.<br />
-                    <strong>Fix:</strong> Updated `@CrossOrigin(origins = "*")` in the Java Controller to allow external connections.
-                </div>
-            </details>
-
-            <details className="bg-slate-800 border border-slate-700 rounded-lg group">
-                <summary className="flex justify-between items-center p-4 cursor-pointer font-medium text-slate-200 group-hover:text-emerald-400 transition">
-                    <span>Error 503: Gemini Model Overloaded</span>
-                    <span className="transition group-open:rotate-180">▼</span>
-                </summary>
-                <div className="p-4 border-t border-slate-700 text-slate-400 text-sm leading-relaxed">
-                    <strong>Issue:</strong> The `gemini-2.5-flash` model was too busy/unavailable.<br />
-                    <strong>Fix:</strong> Downgraded API call to the stable `gemini-2.0-flash-001` version.
-                </div>
-            </details>
-
-            {/* The Updated Final Boss */}
             <details className="bg-slate-800 border border-emerald-500/30 rounded-lg group shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                <summary className="flex justify-between items-center p-4 cursor-pointer font-bold text-emerald-400 group-hover:text-emerald-300 transition">
+                <summary class="flex justify-between items-center p-4 cursor-pointer font-bold text-emerald-400 group-hover:text-emerald-300 transition">
                     <span>Final Boss: Malformed OpenAI Base URL</span>
-                    <span className="transition group-open:rotate-180">▼</span>
+                    <span class="transition group-open:rotate-180">▼</span>
                 </summary>
-                <div className="p-4 border-t border-slate-700 text-slate-300 text-sm leading-relaxed">
+                <div class="p-4 border-t border-slate-700 text-slate-300 text-sm leading-relaxed">
                     <strong>Issue:</strong> Spring AI's OpenAI Compatibility layer returned <code>404 Not Found (v1main)</code> when trying to reach Gemini 2.0. <br />
                     <strong>Diagnosis:</strong> A trailing slash in the Base URL (`.../openai/`) caused a double-slash issue (`//chat`), breaking the path on Google's server.<br />
                     <strong>Fix:</strong> Removed the trailing slash in <code>application.properties</code> and explicitly set the model to <code>gemini-2.0-flash-001</code>. Success!
